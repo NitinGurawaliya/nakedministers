@@ -10,7 +10,7 @@ export function SiteHeader() {
             <Scale className="h-5 w-5 text-background" />
           </span>
           <span className="text-lg font-bold tracking-tight text-foreground">
-            Nanga Neta
+            Naked Ministers
           </span>
         </Link>
         <nav className="flex items-center gap-6">

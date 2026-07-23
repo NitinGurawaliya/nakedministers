@@ -5,7 +5,7 @@ const SECTIONS = [
     icon: FileText,
     title: 'Data Sources',
     body: [
-      'All financial figures on Nanga Neta are sourced exclusively from publicly available election affidavits filed by candidates with the Election Commission of India. These documents are filed under oath by the candidate at the time of nomination.',
+      'All financial figures on Naked Ministers are sourced exclusively from publicly available election affidavits filed by candidates with the Election Commission of India. These documents are filed under oath by the candidate at the time of nomination.',
       'We transcribe the declared values for assets, liabilities, and income directly from these affidavits. We do not estimate, infer, or supplement this data with information from any other source.',
       'Affidavits are typically filed before each election cycle. Where a politician has contested multiple elections, we compare the earliest and most recent available affidavits to calculate growth over their time in office.',
     ],
@@ -35,7 +35,7 @@ const SECTIONS = [
     title: 'Reporting a Data Error',
     body: [
       'If you believe a figure on this site does not match the original affidavit, we want to know. Every profile includes a correction contact at the bottom of the page.',
-      "Email us at corrections@nanganeta.in with the politician's name, the specific field in question, and (if possible) a reference to the original affidavit. We will review and update the record.",
+      "Email us at corrections@nakedministers.in with the politician's name, the specific field in question, and (if possible) a reference to the original affidavit. We will review and update the record.",
       'We are committed to accuracy. If we have made a transcription error, we will correct it promptly and transparently.',
     ],
   },
@@ -46,13 +46,13 @@ export default function MethodologyPage() {
     <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-20">
       <div className="mb-12">
         <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-          About Nanga Neta
+          About Naked Ministers
         </p>
         <h1 className="mt-2 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
           Methodology & Data Sources
         </h1>
         <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
-          Nanga Neta is a civic transparency tool. We publish declared
+          Naked Ministers is a civic transparency tool. We publish declared
           financial data from public election affidavits — nothing more, nothing
           less. Here's exactly how we do it.
         </p>
@@ -85,7 +85,7 @@ export default function MethodologyPage() {
 
       <div className="mt-16 rounded-xl border border-border bg-muted/30 p-6">
         <p className="text-sm font-medium text-foreground">
-          Nanga Neta is not affiliated with any political party, government
+          Naked Ministers is not affiliated with any political party, government
           body, or the Election Commission of India. It is an independent civic
           tool built to make already-public data easier to access and
           understand.

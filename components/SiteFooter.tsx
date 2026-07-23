@@ -12,7 +12,7 @@ export function SiteFooter() {
                 <Scale className="h-5 w-5 text-background" />
               </span>
               <span className="text-lg font-bold tracking-tight text-foreground">
-                Nanga Neta
+                Naked Ministers
               </span>
             </div>
             <p className="mt-3 text-sm text-muted-foreground">
@@ -79,7 +79,7 @@ export function SiteFooter() {
         </div>
         <div className="mt-10 border-t border-border pt-6">
           <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} Nanga Neta. All data sourced from
+            © {new Date().getFullYear()} Naked Ministers. All data sourced from
             publicly available Election Commission of India affidavits. This is
             a civic transparency tool, not affiliated with any political party
             or government body.

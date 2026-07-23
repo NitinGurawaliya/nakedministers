@@ -46,7 +46,7 @@ export function SourceFooter({ source, date, className }: SourceFooterProps) {
       <p className="mt-4 border-t border-border pt-3 text-xs text-muted-foreground">
         Report a data discrepancy:{' '}
         <span className="font-medium text-foreground underline underline-offset-2">
-          corrections@nanganeta.in
+          corrections@nakedministers.in
         </span>
       </p>
     </div>

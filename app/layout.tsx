@@ -7,11 +7,11 @@ import { SiteFooter } from '@/components/SiteFooter';
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
 export const metadata: Metadata = {
-  title: "Nanga Neta — Track Indian MPs' declared wealth growth",
+  title: "Naked Ministers — Track Indian MPs' declared wealth growth",
   description:
     "A civic transparency tool tracking declared wealth growth of Indian MPs from public election affidavits. Every rupee they declared. Every year they grew richer.",
   openGraph: {
-    title: "Nanga Neta — Track Indian MPs' declared wealth growth",
+    title: "Naked Ministers — Track Indian MPs' declared wealth growth",
     description:
       'A civic transparency tool tracking declared wealth growth of Indian MPs from public election affidavits.',
     type: 'website',
