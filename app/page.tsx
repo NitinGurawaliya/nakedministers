@@ -30,7 +30,7 @@ export default function Home() {
     <div className="flex flex-col">
       {/* Hero */}
       <section
-        className="relative overflow-hidden"
+        className="relative -mt-[88px] overflow-hidden pt-[88px]"
         style={{
           background:
             'linear-gradient(175deg, #F97316 0%, #FB923C 8%, #FED7AA 22%, #FFF7ED 38%, #FFFFFF 52%, #EFF6FF 68%, #DBEAFE 82%, #BFDBFE 100%)',
@@ -47,11 +47,11 @@ export default function Home() {
           style={{ background: 'radial-gradient(circle, #3B82F6 0%, transparent 70%)' }}
         />
 
-        <div className="relative mx-auto max-w-4xl px-4 pb-24 pt-16 sm:px-6 sm:pb-32 sm:pt-20 md:pt-24">
+        <div className="relative mx-auto max-w-4xl px-4 pb-24 pt-0 sm:px-6 sm:pb-32 sm:pt-4 md:pt-8">
           <div className="mx-auto max-w-2xl text-center">
 
             {/* Indian Emblem */}
-            <div className="mb-5 flex justify-center">
+            <div className="mb-4 flex justify-center">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/images/emblem_bg.png"
@@ -61,14 +61,14 @@ export default function Home() {
             </div>
 
             {/* Tricolour rule */}
-            <div className="mx-auto mb-5 flex h-[3px] w-36 overflow-hidden rounded-full">
+            <div className="mx-auto mb-4 flex h-[3px] w-36 overflow-hidden rounded-full">
               <div className="flex-1 bg-orange-500" />
               <div className="flex-1 bg-white ring-1 ring-inset ring-orange-200/40" />
               <div className="flex-1" style={{ background: '#138808' }} />
             </div>
 
             {/* Small tagline */}
-            <p className="mb-5 text-[11px] font-semibold uppercase tracking-[0.22em] text-orange-800/70">
+            <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-orange-800/70">
               Civic Transparency · Public Affidavit Data
             </p>
 
