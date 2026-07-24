@@ -15,7 +15,9 @@ const cheerio = require('cheerio');
 
 const BASE_URL = 'https://myneta.info/LokSabha2024/index.php?action=summary&subAction=winner_analyzed&sort=candidate';
 const OUTPUT_PATH = path.join(process.cwd(), 'winner_candidate_ids.json');
-const PAGE_COUNT = 10; // set to 28 for the full winner list
+const PAGE_COUNT = 35; // raised past the expected ~30 pages so the loop can find the
+                        // real end (a page returning 0 new candidates) instead of being
+                        // cut off by the cap itself, which is what happened at 28
 const REQUEST_DELAY_MS = 1000;
 
 function normalizeWhitespace(value) {
