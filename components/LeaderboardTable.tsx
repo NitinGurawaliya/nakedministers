@@ -1,12 +1,17 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import { Card } from '@/components/ui/card';
 import { PartyBadge } from '@/components/PartyBadge';
-import { getLeaderboardStat, type Politician, type LeaderboardTab } from '@/lib/data';
+import { CandidatePhoto } from '@/components/CandidatePhoto';
+import {
+  getLeaderboardStat,
+  getPartyShort,
+  type Candidate,
+  type LeaderboardTab,
+} from '@/lib/data';
 import { cn } from '@/lib/utils';
 
 interface LeaderboardTableProps {
-  politicians: Politician[];
+  politicians: Candidate[];
   tab: LeaderboardTab;
   className?: string;
 }
@@ -26,9 +31,12 @@ export function LeaderboardTable({ politicians, tab, className }: LeaderboardTab
   return (
     <div className={cn('space-y-2', className)}>
       {politicians.map((p, i) => (
-        <Link key={p.id} href={`/politician/${p.id}`} className="group block">
+        <Link
+          key={p.candidateId}
+          href={`/politician/${p.candidateId}`}
+          className="group block"
+        >
           <Card className="flex items-center gap-3 p-3 transition-all hover:shadow-md hover:-translate-y-0.5 sm:gap-4 sm:p-4">
-            {/* Rank */}
             <div className="flex w-8 flex-none justify-center sm:w-10">
               <span
                 className={cn(
@@ -43,29 +51,23 @@ export function LeaderboardTable({ politicians, tab, className }: LeaderboardTab
                 {i + 1}
               </span>
             </div>
-            {/* Photo */}
-            <div className="relative h-12 w-12 flex-none overflow-hidden rounded-full bg-muted ring-1 ring-border sm:h-14 sm:w-14">
-              <Image
-                src={p.photo}
-                alt={p.name}
-                fill
-                sizes="56px"
-                className="object-cover"
-              />
-            </div>
-            {/* Info */}
+            <CandidatePhoto
+              photoUrl={p.photoUrl}
+              name={p.name}
+              size={56}
+              className="sm:h-14 sm:w-14"
+            />
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
                 <h3 className="truncate text-sm font-semibold text-foreground sm:text-base">
                   {p.name}
                 </h3>
-                <PartyBadge party={p.party} short={p.partyShort} />
+                <PartyBadge party={p.party} short={getPartyShort(p.party)} />
               </div>
               <p className="mt-0.5 truncate text-xs text-muted-foreground sm:text-sm">
-                {p.constituency}, {p.state} · {p.house}
+                {p.constituency}, {p.state}
               </p>
             </div>
-            {/* Stat */}
             <div className="flex-none text-right">
               <p className="text-lg font-bold text-primary sm:text-xl">
                 {getLeaderboardStat(p, tab)}

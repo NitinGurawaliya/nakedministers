@@ -125,7 +125,7 @@ export default function Home() {
           </div>
           <div className="no-scrollbar -mx-4 flex gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0">
             {TRENDING.map((p) => (
-              <PoliticianCard key={p.id} politician={p} variant="compact" />
+              <PoliticianCard key={p.candidateId} politician={p} variant="compact" />
             ))}
             <div className="w-px flex-none" />
           </div>

@@ -1,33 +1,30 @@
 import { notFound } from 'next/navigation';
-import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, MapPin, Calendar, GraduationCap, Gavel, History } from 'lucide-react';
-import { Card } from '@/components/ui/card';
+import { ArrowLeft, MapPin, Calendar, Briefcase, TrendingUp } from 'lucide-react';
 import { HeroStat } from '@/components/HeroStat';
 import { ComparisonTable } from '@/components/ComparisonTable';
 import { SourceFooter } from '@/components/SourceFooter';
 import { PartyBadge } from '@/components/PartyBadge';
 import { AssetBreakdownGrid } from '@/components/AssetBreakdownGrid';
-import { PartyHistoryTimeline } from '@/components/PartyHistoryTimeline';
-import { getPolitician, getMathReveal, formatINR } from '@/lib/data';
+import { AssetTrajectoryChart } from '@/components/AssetTrajectoryChart';
+import { CriminalCasesSection } from '@/components/CriminalCasesSection';
+import { ExpandableText } from '@/components/ExpandableText';
+import { CandidatePhoto } from '@/components/CandidatePhoto';
+import {
+  CANDIDATES,
+  DATA_SOURCE,
+  DATA_SOURCE_DATE,
+  getCandidate,
+  getComparisonPoints,
+  getGrowthPct,
+  getGrowthYears,
+  getMathReveal,
+  getPartyShort,
+  formatINR,
+} from '@/lib/data';
 
 export function generateStaticParams() {
-  return [
-    'rajesh-khanna',
-    'priya-sharma',
-    'arjun-reddy',
-    'meera-iyer',
-    'vikram-singh',
-    'anita-deshmukh',
-    'sanjay-banerjee',
-    'deepak-patel',
-    'kavita-nair',
-    'rohit-yadav',
-    'sunita-devi',
-    'amit-kumar',
-    'lakshmi-venkatesh',
-    'om-prakash',
-  ].map((id) => ({ id }));
+  return CANDIDATES.map((c) => ({ id: String(c.candidateId) }));
 }
 
 export default async function PoliticianDetailPage({
@@ -35,16 +32,17 @@ export default async function PoliticianDetailPage({
 }: {
   params: { id: string };
 }) {
-  const politician = getPolitician(params.id);
-  if (!politician) notFound();
+  const candidate = getCandidate(params.id);
+  if (!candidate) notFound();
 
-  const start = politician.affidavits[0];
-  const end = politician.affidavits[1];
-  const mathReveal = getMathReveal(politician);
+  const growth = getGrowthPct(candidate);
+  const years = getGrowthYears(candidate);
+  const comparison = getComparisonPoints(candidate);
+  const mathReveal = getMathReveal(candidate);
+  const partyShort = getPartyShort(candidate.party);
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-12">
-      {/* Back link */}
       <Link
         href="/search"
         className="mb-8 inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
@@ -55,69 +53,74 @@ export default async function PoliticianDetailPage({
 
       {/* Identity Strip */}
       <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
-        <div className="relative h-28 w-28 flex-none overflow-hidden rounded-2xl bg-muted ring-1 ring-border">
-          <Image
-            src={politician.photo}
-            alt={politician.name}
-            fill
-            sizes="112px"
-            className="object-cover"
-          />
-        </div>
-        <div className="flex-1">
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-              {politician.name}
+        <CandidatePhoto
+          photoUrl={candidate.photoUrl}
+          name={candidate.name}
+          size={112}
+          rounded="2xl"
+        />
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-start gap-3">
+            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl break-words">
+              {candidate.name}
             </h1>
-            <PartyBadge
-              party={politician.party}
-              short={politician.partyShort}
-            />
+            <PartyBadge party={candidate.party} short={partyShort} />
           </div>
-          <p className="mt-1 text-muted-foreground">{politician.party}</p>
+          <p className="mt-1 truncate text-muted-foreground" title={candidate.party}>
+            {candidate.party}
+          </p>
           <div className="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
             <span className="inline-flex items-center gap-1.5">
-              <MapPin className="h-4 w-4" />
-              {politician.constituency}, {politician.state}
+              <MapPin className="h-4 w-4 flex-none" />
+              <span className="break-words">
+                {candidate.constituency}, {candidate.state}
+              </span>
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <Calendar className="h-4 w-4" />
-              Age {politician.age}
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <Calendar className="h-4 w-4" />
-              Term: {politician.currentTerm}
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <GraduationCap className="h-4 w-4" />
-              {politician.education}
+              <Calendar className="h-4 w-4 flex-none" />
+              Age {candidate.age}
             </span>
           </div>
-          <p className="mt-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            {politician.house}
-          </p>
         </div>
       </div>
 
-      {/* Hero Stat Section */}
+      {/* Hero Stat */}
       <div className="relative mt-12 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
         <div className="pointer-events-none absolute inset-0 gradient-blob" />
         <div className="relative px-6 py-16 sm:px-12 sm:py-20">
-          <HeroStat
-            value={`+${politician.growthPct}%`}
-            label={politician.growthLabel}
-            sublabel={`${politician.startYear} → ${politician.endYear}`}
-          />
+          {growth != null && years ? (
+            <HeroStat
+              value={`${growth > 0 ? '+' : ''}${growth}%`}
+              label="Declared asset growth"
+              sublabel={`${years.startYear} → ${years.endYear}`}
+            />
+          ) : (
+            <HeroStat
+              value={formatINR(candidate.totalAssets)}
+              label="Total declared assets"
+              sublabel="Latest affidavit"
+            />
+          )}
         </div>
       </div>
 
-      {/* Comparison Table */}
-      <section className="mt-12">
-        <h2 className="mb-4 text-xl font-bold tracking-tight text-foreground">
-          Declared Wealth Comparison
-        </h2>
-        <ComparisonTable start={start} end={end} />
-      </section>
+      {/* Comparison */}
+      {comparison && comparison.start.year !== comparison.end.year && (
+        <section className="mt-12">
+          <h2 className="mb-4 text-xl font-bold tracking-tight text-foreground">
+            Declared Wealth Comparison
+          </h2>
+          <ComparisonTable
+            start={{ year: comparison.start.year, assets: comparison.start.assets }}
+            end={{
+              year: comparison.end.year,
+              assets: comparison.end.assets,
+              liabilities: comparison.end.liabilities,
+              income: comparison.end.income,
+            }}
+          />
+        </section>
+      )}
 
       {/* Math Reveal */}
       <section className="mt-8">
@@ -131,120 +134,59 @@ export default async function PoliticianDetailPage({
         </div>
       </section>
 
-      {/* Declared Assets Breakdown */}
+      {/* Declared Wealth Breakdown */}
       <section className="mt-12">
         <h2 className="mb-4 text-xl font-bold tracking-tight text-foreground">
-          Declared Assets Breakdown
+          Declared Wealth Breakdown
         </h2>
-        <AssetBreakdownGrid politician={politician} />
+        <AssetBreakdownGrid candidate={candidate} />
+      </section>
+
+      {/* Asset Trajectory */}
+      <section className="mt-12">
+        <div className="mb-4 flex items-center gap-2">
+          <TrendingUp className="h-5 w-5 text-muted-foreground" />
+          <h2 className="text-xl font-bold tracking-tight text-foreground">
+            Asset Trajectory
+          </h2>
+        </div>
+        <AssetTrajectoryChart candidate={candidate} />
       </section>
 
       {/* Criminal Cases */}
+      <CriminalCasesSection candidate={candidate} className="mt-12" />
+
+      {/* Background */}
       <section className="mt-12">
         <div className="mb-4 flex items-center gap-2">
-          <Gavel className="h-5 w-5 text-muted-foreground" />
+          <Briefcase className="h-5 w-5 text-muted-foreground" />
           <h2 className="text-xl font-bold tracking-tight text-foreground">
-            Declared Criminal Cases
+            Background
           </h2>
         </div>
-        <Card className="overflow-hidden">
-          <div className="flex items-center justify-between border-b border-border bg-muted/30 px-6 py-4">
-            <div className="flex items-center gap-8">
-              <div>
-                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Pending cases ({politician.startYear})
-                </p>
-                <p className="text-2xl font-bold text-foreground">
-                  {politician.criminalCases.before}
-                </p>
-              </div>
-              <div className="text-2xl text-muted-foreground">→</div>
-              <div>
-                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Pending cases ({politician.endYear})
-                </p>
-                <p className="text-2xl font-bold text-foreground">
-                  {politician.criminalCases.after}
-                </p>
-              </div>
+        <div className="space-y-4 rounded-xl border border-border bg-card p-6">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Education
+            </p>
+            <div className="mt-2">
+              <ExpandableText text={candidate.education || 'Not declared'} />
             </div>
           </div>
-          {politician.criminalCases.details.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-border">
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      Case ID
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      Section
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      Description
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      Filed
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      Status
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {politician.criminalCases.details.map((c) => (
-                    <tr
-                      key={c.id}
-                      className="border-b border-border last:border-0"
-                    >
-                      <td className="px-6 py-4 text-sm font-medium text-foreground">
-                        {c.id}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-foreground">
-                        {c.section}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-muted-foreground">
-                        {c.description}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-muted-foreground">
-                        {c.filedYear}
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="inline-flex items-center rounded-md border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">
-                          {c.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          <div className="border-t border-border pt-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Profession
+            </p>
+            <div className="mt-2">
+              <ExpandableText text={candidate.profession || 'Not declared'} />
             </div>
-          ) : (
-            <div className="px-6 py-8 text-center">
-              <p className="text-sm text-muted-foreground">
-                No criminal cases declared in either affidavit.
-              </p>
-            </div>
-          )}
-        </Card>
-      </section>
-
-      {/* Political History */}
-      <section className="mt-12">
-        <div className="mb-4 flex items-center gap-2">
-          <History className="h-5 w-5 text-muted-foreground" />
-          <h2 className="text-xl font-bold tracking-tight text-foreground">
-            Political History
-          </h2>
+          </div>
         </div>
-        <Card className="p-6">
-          <PartyHistoryTimeline politician={politician} />
-        </Card>
       </section>
 
       {/* Source Footer */}
       <section className="mt-12">
-        <SourceFooter source={politician.source} date={politician.sourceDate} />
+        <SourceFooter source={DATA_SOURCE} date={DATA_SOURCE_DATE} />
       </section>
     </div>
   );

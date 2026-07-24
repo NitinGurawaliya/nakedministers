@@ -1,9 +1,14 @@
 import { Card } from '@/components/ui/card';
-import { formatINR, getWealthTranslation, type Politician } from '@/lib/data';
+import {
+  formatINR,
+  getWealthTranslation,
+  hasSpouseData,
+  type Candidate,
+} from '@/lib/data';
 import { cn } from '@/lib/utils';
 
 interface AssetBreakdownGridProps {
-  politician: Politician;
+  candidate: Candidate;
   className?: string;
 }
 
@@ -29,36 +34,57 @@ function StatCard({ value, label, sublabel }: StatCardProps) {
   );
 }
 
-export function AssetBreakdownGrid({ politician, className }: AssetBreakdownGridProps) {
-  const a = politician.assets;
+export function AssetBreakdownGrid({ candidate, className }: AssetBreakdownGridProps) {
+  const showSpouse = hasSpouseData(candidate);
+
   return (
     <div className={cn('space-y-4', className)}>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <StatCard
-          value={`${a.vehicles.count}`}
-          label="Vehicles owned"
-          sublabel={a.vehicles.description}
+          value={formatINR(candidate.movableAssetsSelf)}
+          label="Movable assets (self)"
         />
         <StatCard
-          value={`${a.properties.count}`}
-          label="Properties owned"
-          sublabel={a.properties.description}
+          value={formatINR(candidate.immovableAssetsSelf)}
+          label="Immovable assets (self)"
         />
         <StatCard
-          value={formatINR(a.goldValue)}
-          label="Gold & jewellery value"
+          value={formatINR(candidate.selfIncomeLatest)}
+          label="Latest income (self)"
+        />
+        {showSpouse ? (
+          <>
+            <StatCard
+              value={formatINR(candidate.movableAssetsSpouse)}
+              label="Movable assets (spouse)"
+            />
+            <StatCard
+              value={formatINR(candidate.immovableAssetsSpouse)}
+              label="Immovable assets (spouse)"
+            />
+            <StatCard
+              value={
+                candidate.spouseIncomeLatest != null && candidate.spouseIncomeLatest > 0
+                  ? formatINR(candidate.spouseIncomeLatest)
+                  : '—'
+              }
+              label="Latest income (spouse)"
+            />
+          </>
+        ) : (
+          <StatCard
+            value="—"
+            label="Spouse assets / income"
+            sublabel="No spouse data declared"
+          />
+        )}
+        <StatCard
+          value={formatINR(candidate.totalLiabilities)}
+          label="Total liabilities"
         />
         <StatCard
-          value={formatINR(a.loansGiven)}
-          label="Personal loans given out"
-        />
-        <StatCard
-          value={`${a.bankAccounts}`}
-          label="Bank accounts held"
-        />
-        <StatCard
-          value={a.wealthRank}
-          label="Wealth rank"
+          value={formatINR(candidate.totalAssets)}
+          label="Total assets"
         />
       </div>
       <div className="rounded-xl border border-border bg-muted/30 px-6 py-5">
@@ -66,7 +92,7 @@ export function AssetBreakdownGrid({ politician, className }: AssetBreakdownGrid
           Translate the wealth
         </p>
         <p className="mt-2 text-lg font-medium leading-relaxed text-foreground">
-          {getWealthTranslation(politician)}
+          {getWealthTranslation(candidate)}
         </p>
       </div>
     </div>

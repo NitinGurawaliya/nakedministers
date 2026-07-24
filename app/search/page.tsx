@@ -4,26 +4,15 @@ import { useState, useMemo } from 'react';
 import { Search, X, SlidersHorizontal } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { PoliticianCard } from '@/components/PoliticianCard';
-import { POLITICIANS, ALL_STATES, ALL_PARTIES, HOUSES } from '@/lib/data';
-import type { House } from '@/lib/data';
+import { CANDIDATES, ALL_STATES, ALL_PARTIES, getPartyShort } from '@/lib/data';
 import { cn } from '@/lib/utils';
 
-const SUGGESTIONS = [
-  'Rajesh Khanna',
-  'Priya Sharma',
-  'Arjun Reddy',
-  'Meera Iyer',
-  'Vikram Singh',
-  'Anita Deshmukh',
-  'Sanjay Banerjee',
-  'Deepak Patel',
-];
+const SUGGESTIONS = CANDIDATES.slice(0, 12).map((c) => c.name);
 
-type FilterKey = 'state' | 'party' | 'house';
+type FilterKey = 'state' | 'party';
 interface Filters {
   state: string | null;
   party: string | null;
-  house: House | null;
 }
 
 export default function SearchPage() {
@@ -32,32 +21,36 @@ export default function SearchPage() {
   const [filters, setFilters] = useState<Filters>({
     state: null,
     party: null,
-    house: null,
   });
 
   const filteredSuggestions = useMemo(() => {
-    if (!query) return SUGGESTIONS;
-    return SUGGESTIONS.filter((s) =>
-      s.toLowerCase().includes(query.toLowerCase())
-    );
+    const pool = query
+      ? CANDIDATES.filter((c) =>
+          c.name.toLowerCase().includes(query.toLowerCase())
+        )
+          .slice(0, 8)
+          .map((c) => c.name)
+      : SUGGESTIONS;
+    return pool;
   }, [query]);
 
   const results = useMemo(() => {
-    return POLITICIANS.filter((p) => {
+    return CANDIDATES.filter((p) => {
       if (query) {
         const q = query.toLowerCase();
+        const short = getPartyShort(p.party).toLowerCase();
         if (
           !p.name.toLowerCase().includes(q) &&
           !p.constituency.toLowerCase().includes(q) &&
           !p.state.toLowerCase().includes(q) &&
-          !p.partyShort.toLowerCase().includes(q)
+          !p.party.toLowerCase().includes(q) &&
+          !short.includes(q)
         ) {
           return false;
         }
       }
       if (filters.state && p.state !== filters.state) return false;
       if (filters.party && p.party !== filters.party) return false;
-      if (filters.house && p.house !== filters.house) return false;
       return true;
     });
   }, [query, filters]);
@@ -72,28 +65,26 @@ export default function SearchPage() {
   }
 
   function clearFilters() {
-    setFilters({ state: null, party: null, house: null });
+    setFilters({ state: null, party: null });
   }
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
-      {/* Search Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
           Search Your MP
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Browse {POLITICIANS.length}+ profiles with declared wealth data from
+          Browse {CANDIDATES.length} profiles with declared wealth data from
           election affidavits.
         </p>
       </div>
 
-      {/* Search Bar */}
       <div className="relative mb-6">
         <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
         <Input
           type="text"
-          placeholder="Search by name, constituency, or state..."
+          placeholder="Search by name, constituency, party, or state..."
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);
@@ -126,14 +117,13 @@ export default function SearchPage() {
                 className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted"
               >
                 <Search className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm text-foreground">{s}</span>
+                <span className="truncate text-sm text-foreground">{s}</span>
               </button>
             ))}
           </div>
         )}
       </div>
 
-      {/* Filter Chips */}
       <div className="mb-8 space-y-4">
         <div className="flex items-center gap-2">
           <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
@@ -150,7 +140,6 @@ export default function SearchPage() {
           )}
         </div>
 
-        {/* State filters */}
         <div>
           <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             State
@@ -167,7 +156,6 @@ export default function SearchPage() {
           </div>
         </div>
 
-        {/* Party filters */}
         <div>
           <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Party
@@ -175,7 +163,7 @@ export default function SearchPage() {
           <div className="flex flex-wrap gap-2">
             {ALL_PARTIES.map((party) => (
               <FilterChip
-                key={party.short}
+                key={party.name}
                 label={party.short}
                 active={filters.party === party.name}
                 onClick={() => toggleFilter('party', party.name)}
@@ -183,26 +171,8 @@ export default function SearchPage() {
             ))}
           </div>
         </div>
-
-        {/* House filters */}
-        <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            House
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {HOUSES.map((house) => (
-              <FilterChip
-                key={house}
-                label={house}
-                active={filters.house === house}
-                onClick={() => toggleFilter('house', house)}
-              />
-            ))}
-          </div>
-        </div>
       </div>
 
-      {/* Results */}
       <div className="mb-4 flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
           <span className="font-semibold text-foreground">{results.length}</span>{' '}
@@ -213,7 +183,7 @@ export default function SearchPage() {
       {results.length > 0 ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {results.map((p) => (
-            <PoliticianCard key={p.id} politician={p} />
+            <PoliticianCard key={p.candidateId} politician={p} />
           ))}
         </div>
       ) : (
@@ -240,8 +210,9 @@ function FilterChip({
   return (
     <button
       onClick={onClick}
+      title={label}
       className={cn(
-        'rounded-full border px-3 py-1.5 text-sm font-medium transition-colors',
+        'max-w-[14rem] truncate rounded-full border px-3 py-1.5 text-sm font-medium transition-colors',
         active
           ? 'border-foreground bg-foreground text-background'
           : 'border-border bg-card text-muted-foreground hover:border-foreground/40 hover:text-foreground'

@@ -1,10 +1,17 @@
 import { Card } from '@/components/ui/card';
-import { formatINR, formatINRFull, type AffidavitYear } from '@/lib/data';
+import { formatINR, formatINRFull } from '@/lib/data';
 import { cn } from '@/lib/utils';
 
+export interface ComparisonPoint {
+  year: number;
+  assets: number;
+  liabilities?: number;
+  income?: number;
+}
+
 interface ComparisonTableProps {
-  start: AffidavitYear;
-  end: AffidavitYear;
+  start: ComparisonPoint;
+  end: ComparisonPoint;
   className?: string;
 }
 
@@ -12,14 +19,15 @@ function Row({
   label,
   startValue,
   endValue,
-  isCurrency = true,
 }: {
   label: string;
-  startValue: number;
-  endValue: number;
-  isCurrency?: boolean;
+  startValue: number | undefined;
+  endValue: number | undefined;
 }) {
-  const diff = endValue - startValue;
+  if (startValue == null && endValue == null) return null;
+  const s = startValue ?? 0;
+  const e = endValue ?? 0;
+  const diff = e - s;
   const isPositive = diff >= 0;
   return (
     <div className="grid grid-cols-3 items-center gap-4 border-b border-border px-6 py-4 last:border-0">
@@ -28,30 +36,36 @@ function Row({
       </div>
       <div className="sm:col-span-1">
         <p className="text-sm font-semibold text-foreground sm:text-base">
-          {isCurrency ? formatINR(startValue) : startValue}
+          {startValue == null ? '—' : formatINR(s)}
         </p>
-        <p className="hidden text-xs text-muted-foreground sm:block">
-          {formatINRFull(startValue)}
-        </p>
+        {startValue != null && (
+          <p className="hidden text-xs text-muted-foreground sm:block">
+            {formatINRFull(s)}
+          </p>
+        )}
       </div>
       <div className="sm:col-span-1">
         <div className="flex items-baseline gap-2">
           <p className="text-sm font-semibold text-foreground sm:text-base">
-            {isCurrency ? formatINR(endValue) : endValue}
+            {endValue == null ? '—' : formatINR(e)}
           </p>
-          <span
-            className={cn(
-              'text-xs font-medium',
-              isPositive ? 'text-primary' : 'text-emerald-600'
-            )}
-          >
-            {isPositive ? '+' : ''}
-            {isCurrency ? formatINR(diff) : diff}
-          </span>
+          {startValue != null && endValue != null && (
+            <span
+              className={cn(
+                'text-xs font-medium',
+                isPositive ? 'text-primary' : 'text-emerald-600'
+              )}
+            >
+              {isPositive ? '+' : ''}
+              {formatINR(diff)}
+            </span>
+          )}
         </div>
-        <p className="hidden text-xs text-muted-foreground sm:block">
-          {formatINRFull(endValue)}
-        </p>
+        {endValue != null && (
+          <p className="hidden text-xs text-muted-foreground sm:block">
+            {formatINRFull(e)}
+          </p>
+        )}
       </div>
     </div>
   );
@@ -71,7 +85,6 @@ export function ComparisonTable({ start, end, className }: ComparisonTableProps)
           {end.year}
         </div>
       </div>
-      <Row label="Net Worth" startValue={start.netWorth} endValue={end.netWorth} />
       <Row label="Total Assets" startValue={start.assets} endValue={end.assets} />
       <Row
         label="Liabilities"
@@ -79,9 +92,9 @@ export function ComparisonTable({ start, end, className }: ComparisonTableProps)
         endValue={end.liabilities}
       />
       <Row
-        label="Declared Income"
-        startValue={start.declaredIncome}
-        endValue={end.declaredIncome}
+        label="Declared Income (self)"
+        startValue={start.income}
+        endValue={end.income}
       />
     </Card>
   );
