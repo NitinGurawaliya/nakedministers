@@ -21,7 +21,7 @@ interface Filters {
 }
 
 export default function SearchPage() {
-  const { navigateWithPreservedScroll } = useScrollRestoration('/search');
+  const { navigateWithPreservedScroll, ready } = useScrollRestoration('/search');
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [query, setQuery] = useState('');
@@ -78,7 +78,7 @@ export default function SearchPage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
+    <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16" style={{ visibility: ready ? 'visible' : 'hidden' }}>
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
           Search Your MP

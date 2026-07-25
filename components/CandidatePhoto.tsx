@@ -68,8 +68,6 @@ export function CandidatePhoto({
       <Image
         src={photoUrl!}
         alt={name}
-        width={size}
-        height={size}
         fill
         sizes={`${size}px`}
         className="object-cover"

@@ -1,6 +1,6 @@
 'use client';
 
-import { useLayoutEffect } from 'react';
+import { useLayoutEffect, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 function getRouteKey(pathname: string, search: string) {
@@ -23,6 +23,7 @@ export function useScrollRestoration(routeKey?: string) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [ready, setReady] = useState(false);
   const resolvedRouteKey =
     routeKey ?? getRouteKey(pathname, searchParams.toString());
 
@@ -40,51 +41,49 @@ export function useScrollRestoration(routeKey?: string) {
     const restoreTarget = window.sessionStorage.getItem(targetKey);
     const restoreTargetItem = window.sessionStorage.getItem(targetItemKey);
 
-    if (restoreTarget != null) {
-      const targetY = Number(restoreTarget);
-      const targetElementId = restoreTargetItem ? `card-${restoreTargetItem}` : null;
+    setReady(false);
 
-      const tryElementRestore = () => {
-        if (!targetElementId) return false;
-
-        const element = document.getElementById(targetElementId);
-
-        if (!element) return false;
-
-        element.scrollIntoView({ block: 'center', behavior: 'auto' });
-        return true;
-      };
-
-      const restoreScrollPosition = () => {
-        if (!tryElementRestore()) {
-          window.scrollTo({ top: targetY, behavior: 'auto' });
-        }
-      };
-
-      window.sessionStorage.removeItem(targetKey);
-      window.sessionStorage.removeItem(targetItemKey);
-
-      window.requestAnimationFrame(() => {
-        restoreScrollPosition();
-        window.requestAnimationFrame(restoreScrollPosition);
-      });
-      const timeoutId = window.setTimeout(restoreScrollPosition, 100);
-      const timeoutId2 = window.setTimeout(restoreScrollPosition, 300);
-      const timeoutId3 = window.setTimeout(restoreScrollPosition, 500);
-
+    if (restoreTarget == null) {
+      setReady(true);
       window.addEventListener('scroll', saveScrollPosition, { passive: true });
 
       return () => {
-        window.clearTimeout(timeoutId);
-        window.clearTimeout(timeoutId2);
-        window.clearTimeout(timeoutId3);
         window.removeEventListener('scroll', saveScrollPosition);
       };
     }
 
+    const targetY = Number(restoreTarget);
+    const targetElementId = restoreTargetItem ? `card-${restoreTargetItem}` : null;
+
+    const tryElementRestore = () => {
+      if (!targetElementId) return false;
+
+      const element = document.getElementById(targetElementId);
+
+      if (!element) return false;
+
+      element.scrollIntoView({ block: 'center', behavior: 'auto' });
+      return true;
+    };
+
+    const restoreScrollPosition = () => {
+      if (!tryElementRestore()) {
+        window.scrollTo({ top: targetY, behavior: 'auto' });
+      }
+    };
+
+    window.sessionStorage.removeItem(targetKey);
+    window.sessionStorage.removeItem(targetItemKey);
+
+    restoreScrollPosition();
+    setReady(true);
+
+    const timeoutId = window.setTimeout(restoreScrollPosition, 150);
+
     window.addEventListener('scroll', saveScrollPosition, { passive: true });
 
     return () => {
+      window.clearTimeout(timeoutId);
       window.removeEventListener('scroll', saveScrollPosition);
     };
   }, [resolvedRouteKey]);
@@ -110,5 +109,5 @@ export function useScrollRestoration(routeKey?: string) {
     router.push(href, { scroll: true });
   };
 
-  return { navigateWithPreservedScroll };
+  return { navigateWithPreservedScroll, ready };
 }

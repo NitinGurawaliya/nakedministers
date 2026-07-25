@@ -14,7 +14,7 @@ const TABS: { key: LeaderboardTab; label: string }[] = [
 ];
 
 export default function LeaderboardsPage() {
-  useScrollRestoration('/leaderboards');
+  const { ready } = useScrollRestoration('/leaderboards');
   const [tab, setTab] = useState<LeaderboardTab>('wealth');
   const [state, setState] = useState<string | null>(null);
 
@@ -23,7 +23,7 @@ export default function LeaderboardsPage() {
   const activeFilterCount = state ? 1 : 0;
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 sm:py-16">
+    <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16" style={{ visibility: ready ? 'visible' : 'hidden' }}>
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
           Leaderboards
