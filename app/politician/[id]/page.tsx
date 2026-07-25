@@ -22,6 +22,7 @@ import {
   getPartyShort,
   formatINR,
 } from '@/lib/data';
+import { BackLink } from '../../../components/BackLink';
 
 export function generateStaticParams() {
   return CANDIDATES.map((c) => ({ id: String(c.candidateId) }));
@@ -29,8 +30,10 @@ export function generateStaticParams() {
 
 export default async function PoliticianDetailPage({
   params,
+  searchParams,
 }: {
   params: { id: string };
+  searchParams?: { from?: string };
 }) {
   const candidate = getCandidate(params.id);
   if (!candidate) notFound();
@@ -40,16 +43,19 @@ export default async function PoliticianDetailPage({
   const comparison = getComparisonPoints(candidate);
   const mathReveal = getMathReveal(candidate);
   const partyShort = getPartyShort(candidate.party);
+  const backHref = searchParams?.from && searchParams.from.startsWith('/')
+    ? searchParams.from
+    : '/search';
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-12">
-      <Link
-        href="/search"
+      <BackLink
+        href={backHref}
         className="mb-8 inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" />
-        Back to search
-      </Link>
+        Back
+      </BackLink>
 
       {/* Identity Strip */}
       <div className="flex flex-col gap-6 sm:flex-row sm:items-center">

@@ -15,22 +15,27 @@ interface PoliticianCardProps {
   politician: Candidate;
   variant?: 'default' | 'compact';
   className?: string;
+  href?: string;
+  preserveScroll?: boolean;
 }
 
 export function PoliticianCard({
   politician,
   variant = 'default',
   className,
+  href,
+  preserveScroll = false,
 }: PoliticianCardProps) {
   const growth = getGrowthPct(politician);
   const years = getGrowthYears(politician);
   const partyShort = getPartyShort(politician.party);
-  const href = `/politician/${politician.candidateId}`;
+  const destination = href ?? `/politician/${politician.candidateId}`;
 
   if (variant === 'compact') {
     return (
-      <Link href={href} className="group block">
+      <Link href={destination} scroll={!preserveScroll ? undefined : false} className="group block">
         <Card
+          id={`card-${politician.candidateId}`}
           className={cn(
             'flex w-[260px] flex-none gap-3 p-3 transition-all hover:shadow-md',
             className
@@ -58,8 +63,9 @@ export function PoliticianCard({
   }
 
   return (
-    <Link href={href} className="group block">
+    <Link href={destination} scroll={!preserveScroll ? undefined : false} className="group block">
       <Card
+        id={`card-${politician.candidateId}`}
         className={cn(
           'overflow-hidden transition-all hover:shadow-md hover:-translate-y-0.5',
           className

@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import { LeaderboardTable } from '@/components/LeaderboardTable';
 import { getLeaderboard, ALL_STATES, type LeaderboardTab } from '@/lib/data';
 import { cn } from '@/lib/utils';
+import { useScrollRestoration } from '@/hooks/useScrollRestoration';
 
 const TABS: { key: LeaderboardTab; label: string }[] = [
   { key: 'wealth', label: 'Most Wealth' },
@@ -13,6 +14,7 @@ const TABS: { key: LeaderboardTab; label: string }[] = [
 ];
 
 export default function LeaderboardsPage() {
+  useScrollRestoration('/leaderboards');
   const [tab, setTab] = useState<LeaderboardTab>('wealth');
   const [state, setState] = useState<string | null>(null);
 

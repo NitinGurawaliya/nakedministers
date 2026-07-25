@@ -1,11 +1,16 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import Link from 'next/link';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { Search, X, SlidersHorizontal } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { PoliticianCard } from '@/components/PoliticianCard';
+import { Card } from '@/components/ui/card';
+import { PartyBadge } from '@/components/PartyBadge';
+import { CandidatePhoto } from '@/components/CandidatePhoto';
 import { CANDIDATES, ALL_STATES, ALL_PARTIES, getPartyShort } from '@/lib/data';
 import { cn } from '@/lib/utils';
+import { useScrollRestoration } from '@/hooks/useScrollRestoration';
 
 const SUGGESTIONS = CANDIDATES.slice(0, 12).map((c) => c.name);
 
@@ -16,6 +21,9 @@ interface Filters {
 }
 
 export default function SearchPage() {
+  const { navigateWithPreservedScroll } = useScrollRestoration('/search');
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [query, setQuery] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filters, setFilters] = useState<Filters>({
@@ -56,6 +64,7 @@ export default function SearchPage() {
   }, [query, filters]);
 
   const activeFilterCount = Object.values(filters).filter(Boolean).length;
+  const from = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
 
   function toggleFilter(key: FilterKey, value: string) {
     setFilters((prev) => ({
@@ -183,7 +192,38 @@ export default function SearchPage() {
       {results.length > 0 ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {results.map((p) => (
-            <PoliticianCard key={p.candidateId} politician={p} />
+            <button
+              key={p.candidateId}
+              type="button"
+              onClick={() =>
+                navigateWithPreservedScroll(
+                    `/politician/${p.candidateId}?from=${encodeURIComponent(from)}`,
+                    p.candidateId
+                )
+              }
+              className="text-left"
+            >
+                <Card id={`card-${p.candidateId}`} className="overflow-hidden transition-all hover:-translate-y-0.5 hover:shadow-md">
+                <div className="flex items-start gap-4 p-5">
+                  <CandidatePhoto
+                    photoUrl={p.photoUrl}
+                    name={p.name}
+                    size={64}
+                  />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-start justify-between gap-2">
+                      <h3 className="line-clamp-2 text-base font-semibold leading-snug text-foreground">
+                        {p.name}
+                      </h3>
+                      <PartyBadge party={p.party} short={getPartyShort(p.party)} />
+                    </div>
+                    <p className="mt-0.5 truncate text-sm text-muted-foreground">
+                      {p.constituency}, {p.state}
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            </button>
           ))}
         </div>
       ) : (
